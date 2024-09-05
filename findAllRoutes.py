@@ -82,8 +82,8 @@ for i in range(0, len(tour)):
     r = requests.get(url=url, headers=headers, params=payload)
     route = r.json()
     Jpoints = route['geometry']['geometry']['coordinates']
-    points.append(gpxpy.gpx.GPXTrackPoint(Jpoints[0][1], Jpoints[0][0], name=persons[s].name))
-    for p in Jpoints[1:]:
+    gpx.waypoints.append(gpxpy.gpx.GPXWaypoint(Jpoints[0][1], Jpoints[0][0], name=persons[s].name))
+    for p in Jpoints:
         points.append(gpxpy.gpx.GPXTrackPoint(p[1], p[0]))
 
 track = gpxpy.gpx.GPXTrack("Hlas")
