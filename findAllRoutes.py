@@ -1,15 +1,15 @@
 #!/usr/bin/python3
 # find all routes between all pointes in positions.csv
 # max 100 points
-# uses time as metrice
+# default by type, param -l use length
 
-import json
 import requests
 import pickle
 from os.path import isfile
 import fast_tsp
 import gpxpy
 import gpxpy.gpx
+import sys
 
 class Person:
     name: str
@@ -27,6 +27,13 @@ index: int = 0
 persons: list[Person] = []
 key: str
 matrix: list[list[int]] = []
+byWhat: str
+
+if len(sys.argv) == 2 and sys.argv[1] == "-l":
+    byWhat = 'length'
+else:
+    byWhat = 'duration'
+
 
 with open("key.api", "r") as f:
     key = f.readline()
@@ -54,7 +61,7 @@ if not isfile('data.pkl'):
         mat = r.json()
         matrix.append([])
         for res in mat['matrix'][0]:
-            matrix[p.index].append(res['duration'])
+            matrix[p.index].append(res[byWhat])
 # Serialize the object to a binary format
     with open('data.pkl', 'wb') as file:
         pickle.dump(matrix, file)
