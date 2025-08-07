@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # find all routes between all pointes in positions.csv
 # max 100 points
-# default by type, param -l use length
+# default by time, param -l use length
 
 import requests
 import pickle
@@ -20,13 +20,13 @@ class Person:
         line = line[:-1]
         data = line.rsplit(",")
         self.name = data[0]
-        self.position = ",".join(data[1:])
+        self.position = ",".join(data[-2:])
         self.index = index
 
 index: int = 0
 persons: list[Person] = []
 key: str
-matrix: list[list[int]] = []
+matrix: list[list[dict[str, int]]] = []
 byWhat: str
 
 if len(sys.argv) == 2 and sys.argv[1] == "-l":
@@ -61,7 +61,7 @@ if not isfile('data.pkl'):
         mat = r.json()
         matrix.append([])
         for res in mat['matrix'][0]:
-            matrix[p.index].append(res[byWhat])
+            matrix[p.index].append(res)
 # Serialize the object to a binary format
     with open('data.pkl', 'wb') as file:
         pickle.dump(matrix, file)
@@ -70,7 +70,15 @@ else:
     with open('data.pkl', 'rb') as file:
         matrix = pickle.load(file)
 
-tour = fast_tsp.find_tour(matrix)
+computeMatrix = {}
+computeMatrix['length'] = [[c['length'] for c in r] for r in matrix]
+computeMatrix['duration'] = [[c['duration'] for c in r] for r in matrix]
+
+tour = fast_tsp.find_tour(computeMatrix[byWhat], 60)
+print('Parametry cesty:')
+print('Délka:', fast_tsp.compute_cost(tour, computeMatrix['length'])/1000, 'km')
+duration = fast_tsp.compute_cost(tour, computeMatrix['duration'])
+print('Doba:', duration//3600, 'h', (duration%3600)//60, 'm', duration%60, 's')
 
 # compute path
 gpx = gpxpy.gpx.GPX()
