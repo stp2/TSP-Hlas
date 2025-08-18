@@ -74,7 +74,7 @@ computeMatrix = {}
 computeMatrix['length'] = [[c['length'] for c in r] for r in matrix]
 computeMatrix['duration'] = [[c['duration'] for c in r] for r in matrix]
 
-tour = fast_tsp.find_tour(computeMatrix[byWhat], 60)
+tour = fast_tsp.solve_tsp_exact(computeMatrix[byWhat])
 print('Parametry cesty:')
 print('Délka:', fast_tsp.compute_cost(tour, computeMatrix['length'])/1000, 'km')
 duration = fast_tsp.compute_cost(tour, computeMatrix['duration'])
@@ -83,9 +83,12 @@ print('Doba:', duration//3600, 'h', (duration%3600)//60, 'm', duration%60, 's')
 # compute path
 gpx = gpxpy.gpx.GPX()
 points: list[gpxpy.gpx.GPXTrackPoint] = []
+
+start = tour.index(0)
+
 for i in range(0, len(tour)):
-    s = tour[i]
-    e = tour[(i+1)%len(tour)]
+    s = tour[(start+i)%len(tour)]
+    e = tour[(start+i+1)%len(tour)]
     url = 'https://api.mapy.cz/v1/routing/route'
     headers = {'accept': 'application/json'}
     payload = {}
